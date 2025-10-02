@@ -1,24 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Newsletter Dashboard
 
-## Getting Started
+A Next.js dashboard for browsing and filtering newsletter advertisements from a Supabase database.
 
-First, run the development server:
+## Features
 
+- Browse newsletter ads with sponsor and newsletter filtering
+- Responsive grid layout
+- Real-time data from Supabase
+- Batch fetching for datasets over 1000 records
+
+## Deployment to Vercel
+
+### Prerequisites
+- Vercel account
+- Supabase project with `newsletter_details` table
+
+### Deploy Steps
+
+1. Push your code to GitHub (if not already)
+
+2. Go to [Vercel](https://vercel.com) and import your repository
+
+3. Configure environment variables in Vercel project settings:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. Deploy! Vercel will automatically build and deploy your app
+
+### Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in your Supabase credentials:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Install dependencies
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+## Tech Stack
+
+- Next.js 15.5.4 with Turbopack
+- React 19
+- Supabase for database
+- Tailwind CSS for styling
+- TypeScript
 
 ## Learn More
 
@@ -26,8 +66,6 @@ To learn more about Next.js, take a look at the following resources:
 
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
 ## Deploy on Vercel
 
