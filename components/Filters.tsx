@@ -87,14 +87,14 @@ export default function Filters({
                 placeholder="Search sponsors..."
                 value={sponsorSearch}
                 onChange={(e) => setSponsorSearch(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900"
               />
             </div>
             <select
               id="sponsor"
               value={selectedSponsor}
               onChange={(e) => onSponsorChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
             >
               <option value="">All Sponsors ({filteredSponsors.length})</option>
               {filteredSponsors.map((sponsor) => (
@@ -124,14 +124,14 @@ export default function Filters({
                 placeholder="Search newsletters..."
                 value={newsletterSearch}
                 onChange={(e) => setNewsletterSearch(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900"
               />
             </div>
             <select
               id="newsletter"
               value={selectedNewsletter}
               onChange={(e) => onNewsletterChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
             >
               <option value="">All Newsletters ({filteredNewsletters.length})</option>
               {filteredNewsletters.map((newsletter) => (
@@ -166,7 +166,7 @@ export default function Filters({
                 id="startDate"
                 value={startDate}
                 onChange={(e) => onStartDateChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900"
               />
             </div>
             <div>
@@ -178,7 +178,7 @@ export default function Filters({
                 id="endDate"
                 value={endDate}
                 onChange={(e) => onEndDateChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900"
               />
             </div>
           </div>

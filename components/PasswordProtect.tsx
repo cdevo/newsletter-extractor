@@ -53,7 +53,7 @@ export default function PasswordProtect({ onAuthenticate }: PasswordProtectProps
                   setPassword(e.target.value)
                   setError(false)
                 }}
-                className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 ${
                   error ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder="Enter password"
