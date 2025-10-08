@@ -1,29 +1,91 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { NewsletterAd } from '@/lib/types'
 import AdCard from '@/components/AdCard'
 import Filters from '@/components/Filters'
+import PasswordProtect from '@/components/PasswordProtect'
 import { Loader2, AlertCircle, Database } from 'lucide-react'
 
+const ITEMS_PER_PAGE = 20
+
 export default function Home() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [authChecked, setAuthChecked] = useState(false)
   const [ads, setAds] = useState<NewsletterAd[]>([])
   const [filteredAds, setFilteredAds] = useState<NewsletterAd[]>([])
+  const [displayedAds, setDisplayedAds] = useState<NewsletterAd[]>([])
   const [sponsors, setSponsors] = useState<string[]>([])
   const [newsletters, setNewsletters] = useState<string[]>([])
   const [selectedSponsor, setSelectedSponsor] = useState('')
   const [selectedNewsletter, setSelectedNewsletter] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const observerTarget = useRef<HTMLDivElement>(null)
 
+  // Check for authentication in sessionStorage
   useEffect(() => {
-    fetchAds()
+    const authenticated = sessionStorage.getItem('authenticated')
+    if (authenticated === 'true') {
+      setIsAuthenticated(true)
+    }
+    setAuthChecked(true)
   }, [])
 
   useEffect(() => {
+    if (isAuthenticated) {
+      fetchAds()
+    }
+  }, [isAuthenticated])
+
+  useEffect(() => {
     filterAds()
-  }, [ads, selectedSponsor, selectedNewsletter])
+  }, [ads, selectedSponsor, selectedNewsletter, startDate, endDate])
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setPage(1)
+    setDisplayedAds(filteredAds.slice(0, ITEMS_PER_PAGE))
+    setHasMore(filteredAds.length > ITEMS_PER_PAGE)
+  }, [filteredAds])
+
+  // Load more items when page changes
+  useEffect(() => {
+    if (page > 1) {
+      const startIndex = 0
+      const endIndex = page * ITEMS_PER_PAGE
+      setDisplayedAds(filteredAds.slice(startIndex, endIndex))
+      setHasMore(endIndex < filteredAds.length)
+    }
+  }, [page, filteredAds])
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          setPage((prev) => prev + 1)
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    const currentTarget = observerTarget.current
+    if (currentTarget) {
+      observer.observe(currentTarget)
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget)
+      }
+    }
+  }, [hasMore, loading])
 
   const fetchAds = async () => {
     try {
@@ -94,8 +156,12 @@ export default function Home() {
         console.log(`Successfully fetched ${data.length} ads out of ${count} total in database`)
         setAds(data)
 
-        const uniqueSponsors = Array.from(new Set(data.map(ad => ad.sponsor))).sort()
-        const uniqueNewsletters = Array.from(new Set(data.map(ad => ad.newsletter_name))).sort()
+        const uniqueSponsors = Array.from(new Set(data.map(ad => ad.sponsor))).sort((a, b) =>
+          a.toLowerCase().localeCompare(b.toLowerCase())
+        )
+        const uniqueNewsletters = Array.from(new Set(data.map(ad => ad.newsletter_name))).sort((a, b) =>
+          a.toLowerCase().localeCompare(b.toLowerCase())
+        )
 
         setSponsors(uniqueSponsors)
         setNewsletters(uniqueNewsletters)
@@ -121,12 +187,47 @@ export default function Home() {
       filtered = filtered.filter(ad => ad.newsletter_name === selectedNewsletter)
     }
 
+    if (startDate) {
+      filtered = filtered.filter(ad => {
+        const adDate = new Date(ad.sent_date)
+        const filterStartDate = new Date(startDate)
+        return adDate >= filterStartDate
+      })
+    }
+
+    if (endDate) {
+      filtered = filtered.filter(ad => {
+        const adDate = new Date(ad.sent_date)
+        const filterEndDate = new Date(endDate)
+        // Set end date to end of day to include the entire day
+        filterEndDate.setHours(23, 59, 59, 999)
+        return adDate <= filterEndDate
+      })
+    }
+
     setFilteredAds(filtered)
   }
 
   const handleReset = () => {
     setSelectedSponsor('')
     setSelectedNewsletter('')
+    setStartDate('')
+    setEndDate('')
+  }
+
+  const handleAuthenticate = () => {
+    sessionStorage.setItem('authenticated', 'true')
+    setIsAuthenticated(true)
+  }
+
+  // Wait for auth check to complete before showing anything
+  if (!authChecked) {
+    return null
+  }
+
+  // Show password screen if not authenticated
+  if (!isAuthenticated) {
+    return <PasswordProtect onAuthenticate={handleAuthenticate} />
   }
 
   if (loading) {
@@ -199,15 +300,19 @@ export default function Home() {
           newsletters={newsletters}
           selectedSponsor={selectedSponsor}
           selectedNewsletter={selectedNewsletter}
+          startDate={startDate}
+          endDate={endDate}
           onSponsorChange={setSelectedSponsor}
           onNewsletterChange={setSelectedNewsletter}
+          onStartDateChange={setStartDate}
+          onEndDateChange={setEndDate}
           onReset={handleReset}
         />
 
         <div className="mb-4 flex items-center justify-between">
           <p className="text-gray-600">
-            Showing {filteredAds.length} {filteredAds.length === 1 ? 'ad' : 'ads'}
-            {(selectedSponsor || selectedNewsletter) && ' (filtered)'}
+            Showing {displayedAds.length} of {filteredAds.length} {filteredAds.length === 1 ? 'ad' : 'ads'}
+            {(selectedSponsor || selectedNewsletter || startDate || endDate) && ' (filtered)'}
           </p>
         </div>
 
@@ -223,11 +328,26 @@ export default function Home() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredAds.map((ad) => (
-              <AdCard key={ad.id} ad={ad} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {displayedAds.map((ad) => (
+                <AdCard key={ad.id} ad={ad} />
+              ))}
+            </div>
+
+            {/* Intersection Observer target */}
+            <div ref={observerTarget} className="h-10 flex items-center justify-center mt-8">
+              {hasMore && (
+                <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+              )}
+            </div>
+
+            {!hasMore && displayedAds.length > 0 && (
+              <p className="text-center text-gray-500 text-sm mt-8">
+                You've reached the end of the results
+              </p>
+            )}
+          </>
         )}
       </main>
     </div>
