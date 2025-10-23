@@ -6,6 +6,8 @@ import { Filter, X, Search, Calendar } from 'lucide-react'
 interface FiltersProps {
   sponsors: string[]
   newsletters: string[]
+  sponsorCounts: Record<string, number>
+  newsletterCounts: Record<string, number>
   selectedSponsor: string
   selectedNewsletter: string
   startDate: string
@@ -20,6 +22,8 @@ interface FiltersProps {
 export default function Filters({
   sponsors,
   newsletters,
+  sponsorCounts,
+  newsletterCounts,
   selectedSponsor,
   selectedNewsletter,
   startDate,
@@ -99,7 +103,7 @@ export default function Filters({
               <option value="">All Sponsors ({filteredSponsors.length})</option>
               {filteredSponsors.map((sponsor) => (
                 <option key={sponsor} value={sponsor}>
-                  {sponsor}
+                  {sponsor} ({sponsorCounts[sponsor] || 0})
                 </option>
               ))}
             </select>
@@ -136,7 +140,7 @@ export default function Filters({
               <option value="">All Newsletters ({filteredNewsletters.length})</option>
               {filteredNewsletters.map((newsletter) => (
                 <option key={newsletter} value={newsletter}>
-                  {newsletter}
+                  {newsletter} ({newsletterCounts[newsletter] || 0})
                 </option>
               ))}
             </select>

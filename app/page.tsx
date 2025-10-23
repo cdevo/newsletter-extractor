@@ -18,6 +18,8 @@ export default function Home() {
   const [displayedAds, setDisplayedAds] = useState<NewsletterAd[]>([])
   const [sponsors, setSponsors] = useState<string[]>([])
   const [newsletters, setNewsletters] = useState<string[]>([])
+  const [sponsorCounts, setSponsorCounts] = useState<Record<string, number>>({})
+  const [newsletterCounts, setNewsletterCounts] = useState<Record<string, number>>({})
   const [selectedSponsor, setSelectedSponsor] = useState('')
   const [selectedNewsletter, setSelectedNewsletter] = useState('')
   const [startDate, setStartDate] = useState('')
@@ -156,15 +158,30 @@ export default function Home() {
         console.log(`Successfully fetched ${data.length} ads out of ${count} total in database`)
         setAds(data)
 
-        const uniqueSponsors = Array.from(new Set(data.map(ad => ad.sponsor))).sort((a, b) =>
-          a.toLowerCase().localeCompare(b.toLowerCase())
+        // Normalize to lowercase to prevent case-sensitive duplicates
+        const uniqueSponsors = Array.from(new Set(data.map(ad => ad.sponsor.toLowerCase()))).sort((a, b) =>
+          a.localeCompare(b)
         )
-        const uniqueNewsletters = Array.from(new Set(data.map(ad => ad.newsletter_name))).sort((a, b) =>
-          a.toLowerCase().localeCompare(b.toLowerCase())
+        const uniqueNewsletters = Array.from(new Set(data.map(ad => ad.newsletter_name.toLowerCase()))).sort((a, b) =>
+          a.localeCompare(b)
         )
+
+        // Calculate ad counts for each sponsor and newsletter
+        const sponsorCountMap: Record<string, number> = {}
+        const newsletterCountMap: Record<string, number> = {}
+
+        data.forEach(ad => {
+          const sponsor = ad.sponsor.toLowerCase()
+          const newsletter = ad.newsletter_name.toLowerCase()
+
+          sponsorCountMap[sponsor] = (sponsorCountMap[sponsor] || 0) + 1
+          newsletterCountMap[newsletter] = (newsletterCountMap[newsletter] || 0) + 1
+        })
 
         setSponsors(uniqueSponsors)
         setNewsletters(uniqueNewsletters)
+        setSponsorCounts(sponsorCountMap)
+        setNewsletterCounts(newsletterCountMap)
       } else {
         console.log('No data returned from Supabase')
       }
@@ -180,11 +197,13 @@ export default function Home() {
     let filtered = [...ads]
 
     if (selectedSponsor) {
-      filtered = filtered.filter(ad => ad.sponsor === selectedSponsor)
+      // Case-insensitive comparison
+      filtered = filtered.filter(ad => ad.sponsor.toLowerCase() === selectedSponsor.toLowerCase())
     }
 
     if (selectedNewsletter) {
-      filtered = filtered.filter(ad => ad.newsletter_name === selectedNewsletter)
+      // Case-insensitive comparison
+      filtered = filtered.filter(ad => ad.newsletter_name.toLowerCase() === selectedNewsletter.toLowerCase())
     }
 
     if (startDate) {
@@ -298,6 +317,8 @@ export default function Home() {
         <Filters
           sponsors={sponsors}
           newsletters={newsletters}
+          sponsorCounts={sponsorCounts}
+          newsletterCounts={newsletterCounts}
           selectedSponsor={selectedSponsor}
           selectedNewsletter={selectedNewsletter}
           startDate={startDate}
